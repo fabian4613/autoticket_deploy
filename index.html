@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Informe de Despliegue</title>
+    <style>
+      /* New dark theme styles */
+      body {
+        background-color: #1a1a1a;
+        font-family: Arial, sans-serif;
+        color: #e8e8e8;
+      }
+      .card {
+        background-color: #333;
+      }
+      .card-body {
+        color: #fff;
+      }
+      .form-control,
+      .form-select {
+        background-color: #2a2a2a;
+        border: none;
+        color: #e8e8e8;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #e8e8e8;
+        box-shadow: none;
+      }
+      .form-label {
+        color: #e8e8e8;
+      }
+      .btn-success {
+        background-color: #006400;
+        border-color: #006400;
+        transition: all 0.3s;
+      }
+      .btn-success:hover {
+        background-color: #32cd32;
+        border-color: #32cd32;
+      }
+
+      /* Neon-style colors and animations */
+      .bg-dark {
+        background-color: #1a1a1a !important;
+      }
+      .text-light {
+        color: #e8e8e8 !important;
+      }
+      .node-time-fields {
+        background-color: #444;
+        border: 1px solid #333;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        animation: neon-pulse 1.5s ease-in-out infinite;
+      }
+
+      .env-report {
+        background-color: #222;
+        border: 1px solid #333;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        animation: neon-pulse 1.5s ease-in-out infinite;
+      }
+      .failure {
+        color: #ff3366;
+      }
+      .in-progress {
+        color: #ffcc00;
+      }
+      .successful {
+        color: #33ff33;
+      }
+
+      @keyframes neon-pulse {
+        0% {
+          box-shadow: 0 0 10px #33ff33;
+        }
+        50% {
+          box-shadow: 0 0 20px #33ff33, 0 0 40px #33ff33;
+        }
+        100% {
+          box-shadow: 0 0 10px #33ff33;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-dark">
+    <audio
+      id="button-sound"
+      src="./sounds/button_click.mp3"
+      preload="auto"
+    ></audio>
+    <div class="container d-flex justify-content-center py-5">
+      <div class="row">
+        <div class="">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h1 class="text-center mb-1">Informe de Despliegue</h1>
+              <p class="text-center mb-4">Automatico</p>
+
+              <form id="reportForm">
+                <!-- Stack -->
+                <div class="mb-3">
+                  <label for="stack" class="form-label">STACK:</label>
+                  <select id="stack" name="stack" class="form-select">
+                    <option value="JAVA" class="successful">JAVA</option>
+                    <option value="DJANGO/PHP/MYSQL">DJANGO/PHP/MYSQL</option>
+                    <option value="DOCKER">DOCKER</option>
+                    <option value="SMF">SMF</option>
+                  </select>
+                </div>
+
+                <!-- Instance -->
+                <div class="mb-3">
+                  <label for="instance" class="form-label">Instancia:</label>
+                  <select
+                    id="instance"
+                    name="instance"
+                    class="form-select fix_color"
+                  >
+                    <!-- Docker instance -->
+                    <optgroup
+                      label="DOCKER"
+                      class="bg-secondary"
+                      id="dockerInstances"
+                    >
+                      <option value="GDE_EE" class="bg-dark">GDE_EE</option>
+                    </optgroup>
+                    <!-- Java instances -->
+                    <optgroup
+                      label="JAVA"
+                      id="javaInstances"
+                      class="bg-secondary"
+                    >
+                      <option value="AHCE" class="bg-dark">AHCE</option>
+                      <option value="HCE" class="bg-dark">HCE</option>
+                      <option value="TURNOS" class="bg-dark">TURNOS</option>
+                      <option value="EFECTOR" class="bg-dark">EFECTOR</option>
+                      <option value="BUS" class="bg-dark">BUS</option>
+                      <option value="LOTES" class="bg-dark">LOTES</option>
+                      <option value="RDG" class="bg-dark">RDG</option>
+                      <option value="PRACTICAS_LINEA" class="bg-dark">
+                        PRACTICAS_LINEA
+                      </option>
+                      <option value="PRACTICAS_VIEW" class="bg-dark">
+                        PRACTICAS_VIEW
+                      </option>
+                      <option value="FARMACOS" class="bg-dark">FARMACOS</option>
+                    </optgroup>
+                    <!-- Django/PHP/MySQL instance -->
+                    <optgroup
+                      label="DJANGO/PHP/MYSQL"
+                      id="djangoInstances"
+                      class="bg-secondary"
+                    >
+                      <option value="Deploy GIT Push" class="bg-dark">
+                        Deploy GIT Push
+                      </option>
+                    </optgroup>
+                    <!-- SMF instance -->
+                    <!-- Add SMF instance options here -->
+                  </select>
+                </div>
+
+                <!-- Observation -->
+                <div class="mb-3">
+                  <label for="observation" class="form-label"
+                    >Observación:</label
+                  >
+                  <textarea
+                    id="observation"
+                    name="observation"
+                    class="form-control"
+                    rows="4"
+                  ></textarea>
+                </div>
+
+                <!-- Start time -->
+                <div class="mb-3">
+                  <label for="startTime" class="form-label">
+                    Hora de inicio del servicio deploy:
+                  </label>
+                  <input
+                    type="time"
+                    id="startTime"
+                    name="startTime"
+                    class="form-control"
+                  />
+                </div>
+
+                <!-- End time -->
+                <div class="mb-3">
+                  <label for="endTime" class="form-label">
+                    Hora de finalización del servicio deploy:
+                  </label>
+                  <input
+                    type="time"
+                    id="endTime"
+                    name="endTime"
+                    class="form-control"
+                  />
+                </div>
+
+                <!-- Diagnosis -->
+                <div class="mb-3">
+                  <label class="form-label">Diagnóstico:</label>
+                  <br />
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="revisionWars"
+                      name="revisionWars"
+                    />
+                    <label class="form-check-label" for="revisionWars">
+                      Revisión de WARs
+                    </label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="revisionSigehos"
+                      name="revisionSigehos"
+                    />
+                    <label class="form-check-label" for="revisionSigehos">
+                      SIGEHOS
+                    </label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="revisionDynatrace"
+                      name="revisionDynatrace"
+                    />
+                    <label class="form-check-label" for="revisionDynatrace">
+                      Dynatrace
+                    </label>
+                  </div>
+                </div>
+                <!-- Node -->
+                <div class="mb-3 row" id="nodeSelection">
+                  <label for="node" class="form-label">
+                    Nodos donde se deploya:
+                  </label>
+                  <select
+                    id="node"
+                    name="node"
+                    class="form-select mb-4"
+                    multiple
+                  >
+                    <option value="DEV_N1">DEV_JAVA: N1 (10.9.6.20)</option>
+                    <option value="QA_N1">QA_JAVA: N1 (10.16.0.80)</option>
+                    <option value="HML_N1">HML_N1 (10.12.1.163)</option>
+                    <option value="HML_N2">HML_N2 (10.12.2.78)</option>
+                    <option value="HML_3ROSN1">HML_3ROSN1 (10.12.2.229)</option>
+                    <option value="HML_3ROSN2">HML_3ROSN2 (10.12.2.230)</option>
+                    <option value="PRD_N1">PRD_N1 (10.22.0.121)</option>
+                    <option value="PRD_N2">PRD_N2 (10.22.128.7)</option>
+                    <option value="PRD_N3">PRD_N3 (10.22.128.7)</option>
+                    <option value="PRD_N4">PRD_N4 (10.22.128.10)</option>
+                    <option value="PRD_N5">PRD_N5 (10.22.0.214)</option>
+                    <option value="PRD_3ROSN1">PRD_3ROSN1 (10.22.0.131)</option>
+                    <option value="PRD_3ROSN2">
+                      PRD_3ROSN2 (10.22.128.11)
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Submit button -->
+                <input
+                  type="submit"
+                  value="Generar Informe"
+                  class="btn btn-success mt-3 w-100"
+                />
+              </form>
+
+              <!-- Report -->
+              <div id="report" class="mt-4"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const handleButtonEvents = () => {
+        const buttons = document.querySelectorAll(".btn-success");
+        const audio = document.getElementById("button-sound");
+
+        buttons.forEach(function (button) {
+          button.addEventListener("mouseover", function () {
+            audio.play();
+          });
+          button.addEventListener("mouseout", function () {
+            audio.pause();
+            audio.currentTime = 0;
+          });
+        });
+      };
+
+      const handleNodeChange = (event) => {
+        const nodeTimes = document.getElementById("nodeSelection");
+        Array.from(
+          nodeTimes.getElementsByClassName("node-time-fields")
+        ).forEach((e) => e.remove());
+
+        Array.from(event.target.selectedOptions).forEach(function (option) {
+          const div = document.createElement("div");
+          div.className = "node-time-fields";
+
+          const startLabel = document.createElement("label");
+          startLabel.textContent = `Hora de inicio para ${option.text}:`;
+          startLabel.className = "col-12";
+          div.appendChild(startLabel);
+
+          const startTime = document.createElement("input");
+          startTime.type = "time";
+          startTime.id = `startTime-${option.value}`;
+          startTime.className = "form-control col-12";
+          div.appendChild(startTime);
+
+          const endLabel = document.createElement("label");
+          endLabel.textContent = `Hora de finalización para ${option.text}:`;
+          endLabel.className = "col-12";
+          div.appendChild(endLabel);
+
+          const endTime = document.createElement("input");
+          endTime.type = "time";
+          endTime.id = `endTime-${option.value}`;
+          endTime.className = "form-control col-12";
+          div.appendChild(endTime);
+
+          const statusLabel = document.createElement("label");
+          statusLabel.textContent = `Estado del despliegue para ${option.text}:`;
+          statusLabel.className = "col-12";
+          div.appendChild(statusLabel);
+
+          const status = document.createElement("select");
+          status.id = `status-${option.value}`;
+          status.className = "form-select col-12";
+
+          const statusOptions = ["Exitoso", "Fracaso", "En curso"];
+          for (let i = 0; i < statusOptions.length; i++) {
+            const opt = document.createElement("option");
+            opt.value = statusOptions[i];
+            opt.textContent = statusOptions[i];
+            status.appendChild(opt);
+          }
+          div.appendChild(status);
+
+          nodeTimes.appendChild(div);
+        });
+      };
+
+      document
+        .getElementById("node")
+        .addEventListener("change", handleNodeChange);
+
+      document
+        .getElementById("reportForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const stack = document.getElementById("stack").value;
+          const instance = document.getElementById("instance").value;
+          const observation = document.getElementById("observation").value;
+          const startTime = document.getElementById("startTime").value;
+          const endTime = document.getElementById("endTime").value;
+          const nodeSelect = document.getElementById("node");
+          const nodes = Array.from(nodeSelect.selectedOptions).map(
+            (option) => option.value
+          );
+          const revisionWars = document.getElementById("revisionWars").checked;
+          const revisionSigehos =
+            document.getElementById("revisionSigehos").checked;
+          const revisionDynatrace =
+            document.getElementById("revisionDynatrace").checked;
+
+          let report = document.getElementById("report");
+          report.innerHTML = "";
+
+          // Display the diagnosis information
+          let diagnosisDiv = document.createElement("div");
+          diagnosisDiv.innerHTML = `
+    <h3>Diagnóstico:</h3>
+    <p><strong>Revisión de WARs:</strong> ${
+      revisionWars ? "Exitoso" : "Fracaso"
+    }</p>
+    <p><strong>SIGEHOS:</strong> ${revisionSigehos ? "Exitoso" : "Fracaso"}</p>
+    <p><strong>Dynatrace:</strong> ${
+      revisionDynatrace ? "Exitoso" : "Fracaso"
+    }</p>
+    <hr />
+  `;
+
+          // Display the observation at the beginning of the report
+          let observationDiv = document.createElement("div");
+          observationDiv.innerHTML = `
+    <h3>Observación:</h3>
+    <p>${observation}</p>
+    <hr />
+  `;
+          report.appendChild(observationDiv);
+
+          // Display the service start and end times
+          let timeDiv = document.createElement("div");
+          timeDiv.innerHTML = `
+    <h3>Tiempo de servicio:</h3>
+    <p><strong>Inicio:</strong> ${startTime}</p>
+    <p><strong>Fin:</strong> ${endTime}</p>
+    <hr />
+  `;
+          report.appendChild(timeDiv);
+
+          // Display the title with stack and instance information
+          let reportHeader = document.createElement("h2");
+          const stackTitle = stack === "JAVA" ? "HIS" : stack;
+          reportHeader.textContent = `Informe de Despliegue en ${stackTitle}: ${instance}`;
+          report.appendChild(reportHeader);
+
+          nodes.forEach(function (node) {
+            let startTime = document.getElementById(`startTime-${node}`).value;
+            let endTime = document.getElementById(`endTime-${node}`).value;
+            let status = document.getElementById(`status-${node}`).value;
+
+            let env = node.split("_")[0];
+            let envDiv = document.getElementById(env);
+
+            if (!envDiv) {
+              envDiv = document.createElement("div");
+              envDiv.className = "env-report";
+              envDiv.id = env;
+
+              let envHeader = document.createElement("h3");
+              envHeader.textContent = `Entorno: ${env} - ${instance} `;
+              envDiv.appendChild(envHeader);
+
+              report.appendChild(envDiv);
+            }
+
+            let nodeReport = document.createElement("div");
+
+            // Add appropriate CSS class based on the status
+            let statusClass = "";
+            if (status === "Exitoso") {
+              statusClass = "successful";
+            } else if (status === "Fracaso") {
+              statusClass = "failure";
+            } else if (status === "En curso") {
+              statusClass = "in-progress";
+            }
+
+            nodeReport.innerHTML = `
+          <strong>Nodo:</strong> ${node}<br>
+          <strong>Inicio:</strong> ${startTime}<br>
+          <strong>Fin:</strong> ${endTime}<br>
+          <strong>Estado:</strong> <span class="${statusClass}">${status}</span><br>
+          <br/>
+        `;
+
+            envDiv.appendChild(nodeReport);
+            report.appendChild(diagnosisDiv);
+          });
+        });
+
+      document.getElementById("stack").addEventListener("change", function (e) {
+        var instanceSelect = document.getElementById("instance");
+
+        // Clear the select options
+        instanceSelect.options.length = 0;
+
+        var instances;
+        switch (this.value) {
+          case "DOCKER":
+            instances = ["GDE_EE"];
+            break;
+          case "JAVA":
+            instances = [
+              "AHCE",
+              "HCE",
+              "TURNOS",
+              "EFECTOR",
+              "BUS",
+              "LOTES",
+              "RDG",
+              "PRACTICAS_LINEA",
+              "PRACTICAS_VIEW",
+              "FARMACOS",
+            ];
+            break;
+          case "DJANGO/PHP/MYSQL":
+            instances = ["Deploy GIT Push"];
+            break;
+          default:
+            instances = [];
+        }
+
+        // Add the relevant options for the selected stack
+        for (var i = 0; i < instances.length; i++) {
+          var opt = document.createElement("option");
+          opt.value = instances[i];
+          opt.textContent = instances[i];
+          instanceSelect.appendChild(opt);
+        }
+      });
+
+      handleButtonEvents();
+    </script>
+  </body>
+</html>
